@@ -5,6 +5,9 @@ st.header("Assignment Management")
 st.markdown("-------------")
 st.subheader("Dashboard")
 
+next_assignment_id_number = 3
+
+
 st.divider()
 st.markdown("")
 
@@ -41,9 +44,31 @@ if assignment_type2 == "other":
 due_date = st.date_input("Due_Date")
 
 #button when changing between pages, next page action 
-btn_save = st.button("Save", width="stretch")
+btn_save = st.button("Save", width="stretch",disabled=False)
+
+import time
+#validation check, if title is empty, show warning, else save the data
 if btn_save:
-    st.warning("Working on it...")
+    if not title:
+        st.warning("Title needs to be provided!")
+    else:
+        with st.spinner("Assignment is being recorded..."):
+            time.sleep(5)
+
+            next_assignment_id = "HW" + str(next_assignment_id_number)
+            next_assignment_id_number += 1
+
+            assignments.append({"id":next_assignment_id,
+                    "title":title,
+                    "description":description,
+                    "points":points,
+                    "type":assignment_type})
+
+            st.success("New Assignment is recorded!")
+            st.info("This is a new assignment")
+            st.dataframe(assignments)
+            
+
 
 
 
