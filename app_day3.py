@@ -132,7 +132,7 @@ with tab3:
     for assignment in assignments:
         titles.append(assignment["title"])
 
-    selected_title = st.selectbox("Select a title", titles, key="selected_title_edit")
+    selected_title = st.selectbox("Select a title", titles, key="selected_title_edit1")
 
     assignment_edit = {}
     for assignment in assignments:
@@ -146,7 +146,7 @@ with tab3:
         edit_description = st.text_area("Description", key=f"edit_description_{assignment_edit['id']}", value=assignment_edit['description'])
 
         type_options = ["Homework","Lab"]
-        selected_index = type_options.index(assignment_edit["type"]) 
+        selected_index = type_options.index(assignment_edit["type"].capitalize()) if assignment_edit["type"].capitalize() in type_options else 0
 
         edit_type = st.radio("Type", type_options, 
                              key=f"edit_type_{assignment_edit['id']}",
@@ -167,4 +167,4 @@ with tab3:
             st.rerun()
 
 with st.sidebar:
-    st.markdown()
+    st.markdown("...")
