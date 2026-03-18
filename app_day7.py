@@ -6,13 +6,16 @@ import uuid
 import time
 
 
-st.set_page_config(page_title="Orders Management App", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config("Orders Management App", layout="wide", initial_sidebar_state="expanded")
 
 
 
 if "page" not in st.session_state:
-   st.session_state.page = "home"
+   st.session_state["page"] = "home"
 
+if "messages" not in st.session_state:
+    st.session_state["messages"] = [{"role":"assistant",
+                                     "content":"Hi! How can I help you?"}]
 
 
 inventory = [
@@ -24,9 +27,11 @@ inventory = [
 ]
 
 with st.sidebar:
+
     if st.button("Home",key="home_btn", type="primary", use_container_width=True):
         st.session_state["page"] = "home"
         st.rerun()
+
     if st.button("Orders", key="orders_btn", type="primary", use_container_width=True):
         st.session_state["page"] = "orders"
         st.rerun()
@@ -36,6 +41,8 @@ json_path_inventory = Path("Inventory.json")
 if json_path_inventory.exists:
     with open(json_path_inventory, "r") as f:
         inventory = json.load(f)
+else:
+    inventory = []
 
 json_path_orders = Path("Orders.json")
 if json_path_orders.exists:
@@ -63,9 +70,80 @@ if st.session_state["page"] == "home":
                 st.warning("No order is recorded yet.")
     with col2:
         if selected_category == "Inventory":
+            st.markdown("* Inventory Summary*")
+            st.divider()
             st.metric("Total Inventory", f"{len(inventory)}")
         else:
             st.metric("Total Orders", f"{len(orders)}")
 
 elif st.session_state["page"] == "orders":
-    st.markdown("Under Development")
+
+    tab1, tab2 = st.tabs(["Add New Order", "Cancel Order"])
+    with tab1:
+        col1, col2 = st.columns([3,3])
+
+        with col1:
+            st.subheader("Add New Order")
+            with st.container(border = True):
+
+                selected_item = st.selectbox("Items",options = inventory, format_func = lambda x: f"{x['name']}, {x['stock']}")
+                quantity = st.number_input("Quantity", min_value=1, step=1)
+                if st.button("Create order", key="create_order_btn", type="primary", use_container_width=True):
+                    with st.spinner("Creating the order..."):
+                        total = quantity * selected_item["price"]
+
+                        for item in inventory:
+                            if item["item_id"] == selected_item["item_id"]:
+                                item["stock"] = item["stock"] -quantity
+                                break
+                        
+                        orders.append({"id": str(uuid.uuid4()),
+                                    "item_id": selected_item["item_id"],
+                                    "quantity": quantity,
+                                    "status": "placed",
+                                    "total": total})
+                        
+                        with open(json_path_inventory, "w") as f:
+                            json.dump(inventory, f)
+
+
+                        with open(json_path_orders, "w") as f:
+                            json.dump(orders, f)
+
+                        st.balloons()
+                        st.session_state["page"] = "home"
+                        st.rerun()
+
+        with col2:
+            st.subheader("Chatbot - AI Assistant")
+            col11,col22 = st.columns([2,2])
+            with col11:
+                st.caption("Try asking: How can I add a new order?")
+            with col22:
+                if st.button("Clear", key="clear_chat_btn", type="secondary", use_container_width=True):
+                    st.session_state["messages"] = [{"role":"assistant",
+                                     "content":"Hi! How can I help you?"}]
+                    st.rerun()
+                
+                    
+
+
+            with st.container(border = True, height = 250):
+                for message in st.session_state["messages"]:
+                    with st.chat_message(message["role"]):
+                        st.write(message["content"])
+
+            user_input = st.chat_input("Ask a question...")
+            if user_input:
+                with st.spinner("Thinking..."):
+                    st.session_state["messages"].append({"role":"user", 
+                                                         "content": user_input})
+                    
+                    ai_response = "I could not find an answer for it, try again!"
+                    st.session_state["messages"].append({"role":"assistant", 
+                                                         "content": ai_response})
+                    time.sleep(2)
+                    st.rerun()
+
+    with tab2:
+        pass

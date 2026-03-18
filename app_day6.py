@@ -37,9 +37,9 @@ users = {"id": "1",
 
 
 
-josn_path = Path("users.json")
-if josn_path.exists():
-    with open(josn_path, "r") as f:
+json_path = Path("users.json")
+if json_path.exists():
+    with open(json_path, "r") as f:
         users = json.load(f)
 
 #load data
@@ -138,11 +138,11 @@ if st.session_state["role"] == "Instructor":
                             #next_assignment_id = "HW" + str(next_assignment_id_number)
                             #next_assignment_id_number += 1
 
-                            assignments.append({"id":next_assignment_id,
-                                    "title":title,
-                                    "description":description,
-                                    "points":points,
-                                    "type":assignment_type})
+                            #assignments.append({"id":next_assignment_id,
+                                   # "title":title,
+                                    #"description":description,
+                                   # "points":points,
+                                   # "type":assignment_type})
 
                 #record data into json file
                             with json_path_assignments.open("w",encoding="utf-8") as f:
@@ -258,7 +258,7 @@ else:
                     "role": "Instructor"
                 })
 
-                with open(josn_path, "w") as f:
+                with open(json_path, "w") as f:
                     json.dump(users, f)
             
                 st.success("Account created!")
